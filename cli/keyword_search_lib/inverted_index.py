@@ -2,9 +2,9 @@ import pickle
 from collections import defaultdict, Counter
 import json
 from pathlib import Path
-from cli.keyword_search_util.preprocessor import Preprocessor
+from cli.keyword_search_lib.preprocessor import Preprocessor
 import math
-import cli.keyword_search_util.constants as constants
+import cli.keyword_search_lib.constants as constants
 import os
 
 
@@ -44,9 +44,9 @@ class InvertedIndex:
             data = json.load(f)
         movies = data["movies"]
         for doc_id, movie in enumerate(movies):
-            self.docmap[doc_id + 1] = movie
+            self.docmap[doc_id] = movie
             text = f"{movie['title']} {movie['description']}"
-            self.__add_document(doc_id + 1, text)
+            self.__add_document(doc_id, text)
 
     def save(self):
         with open(self.index_path, "wb") as file:

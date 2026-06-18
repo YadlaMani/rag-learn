@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 import argparse
+import sys
+from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from cli.keyword_search_util.preprocessor import Preprocessor
-from cli.keyword_search_util.inverted_index import InvertedIndex
+from cli.keyword_search_lib.preprocessor import Preprocessor
+from cli.keyword_search_lib.inverted_index import InvertedIndex
 
 import math
-import cli.keyword_search_util.constants as constants
+import cli.keyword_search_lib.constants as constants
 
 
 def main() -> None:
@@ -85,7 +88,7 @@ def main() -> None:
                     if len(search_results) == 5:
                         break
                 for result_id, result_title in search_results.items():
-                    print(f"{result_id} {result_title}")
+                    print(f"{result_id + 1} {result_title}")
 
             except FileNotFoundError:
                 print("The Inverted Index is not build yet")
@@ -96,7 +99,7 @@ def main() -> None:
             inverted_index.save()
         case "tf":
             inverted_index.load()
-            doc_id = args.doc_id
+            doc_id = args.doc_id - 1
             search_token = args.token
             processed_token = processor.process(search_token)
             if len(processed_token) > 1:
@@ -115,7 +118,7 @@ def main() -> None:
 
         case "tfidf":
             inverted_index.load()
-            doc_id = args.doc_id
+            doc_id = args.doc_id - 1
             search_term = args.term
             processed_term = processor.process(search_term)
             if len(processed_term) > 1:
@@ -137,7 +140,7 @@ def main() -> None:
             print(f"BM25 IDF score of '{args.term}': {bm25idf:.2f}")
         case "bm25tf":
             inverted_index.load()
-            doc_id = args.doc_id
+            doc_id = args.doc_id - 1
             search_term = args.term
             processed_term = processor.process(search_term)
             if len(processed_term) > 1:
@@ -156,7 +159,7 @@ def main() -> None:
             docs = inverted_index.bm25_search(query, limit)
             for i, doc_id in enumerate(docs):
                 title = inverted_index.docmap[doc_id]["title"]
-                print(f"{i + 1}. ({doc_id}) {title} - Score: {docs[doc_id]:.2f}")
+                print(f"{i + 1}. ({doc_id + 1}) {title} - Score: {docs[doc_id]:.2f}")
 
         case _:
             parser.print_help()

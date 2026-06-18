@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 from pathlib import Path
 import numpy as np
-from cli.lib.chunking import semantic_chunk
+from cli.semantic_search_lib.chunking import semantic_chunk
 import pickle
 import json
 import os
@@ -107,3 +107,41 @@ class ChunkedSemanticSearch(SemanticSearch):
             self.document_map = {i: doc for i, doc in enumerate(documents)}
             return self.chunk_embeddings
         return self.build_chunk_embeddings(documents)
+    def search_chunks(self,query:str,limit:int=10):
+        query=query.strip()
+        if query=="":
+            return []
+        query_embeddings = self.generate_embedding(query)
+        if self.chunk_metadata is None or self.chunk_embeddings is None:
+            raise ValueError("Call build_chunk_embeddings the chunks_embeddings and chunk_metadata is not build yet")
+        chunk_scores=[]
+        
+        for idx,chunk in enumerate(self.chunk_embeddings):
+            score=cosine_similarity(query_embeddings,chunk)
+            meta=self.chunk_metadata[idx]
+            chunk_scores.append({
+                "chunk_idx":meta["chunk_idx"],
+                "movie_idx":meta["movie_idx"],
+                "score":score
+            })
+        movies_scores={}
+        for chunk_score in chunk_scores:
+            movie_idx=chunk_score["movie_idx"]
+            score=chunk_score["score"]
+            if movies_scores.__contains__(movie_idx):
+                movies_scores[movie_idx]=max(movies_scores[movie_idx],score)
+            else:
+                movies_scores[movie_idx]=score
+        sorted_movies_scores=dict(sorted(movies_scores.items(),key=lambda x:x[1],reverse=True))
+        result=[]
+        for idx,score in sorted_movies_scores.items():
+            result.append({
+                "id":idx,
+                "title":self.document_map[idx]["title"],
+                "document":self.document_map[idx]["description"][:100],
+                "score":round(score,4)  
+            })
+            if(len(result)==limit):
+                return result
+        return result
+        

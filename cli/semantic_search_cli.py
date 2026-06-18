@@ -6,7 +6,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from cli.lib.utils import *
+from cli.semantic_search_lib.utils import *
+from cli.semantic_search_lib.chunking import *
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Semantic Search CLI")
@@ -63,6 +64,15 @@ def main() -> None:
         "embed_chunks", help="Load movies documents and build the chunk embeddings"
     )
     
+    search_chunked__parser = subparser.add_parser(
+        "search_chunked", help="Search text using the chunked semantic search"
+    )
+    search_chunked__parser.add_argument("query", type=str, help="Query to find using the chunked semantic search")
+    search_chunked__parser.add_argument(
+        "--limit", type=int, default=5, help="Number of matching results to show"
+    )
+    
+    
 
     args = parser.parse_args()
 
@@ -91,7 +101,13 @@ def main() -> None:
         
         case "embed_chunks":
             embed_chunks()
-                
+              
+        case "search_chunked":
+            search_result=search_chunked(args.query,args.limit)
+            for i,res in enumerate(search_result):
+                print(f"\n{i+1}. {res["title"]} (score: {res["score"]:.4f})")
+                print(f"\t{res["document"]}...")
+                 
             
         case _:
             parser.print_help()

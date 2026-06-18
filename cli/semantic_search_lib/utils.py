@@ -1,4 +1,4 @@
-from cli.lib.semantic_search import SemanticSearch,ChunkedSemanticSearch
+from cli.semantic_search_lib.semantic_search import SemanticSearch,ChunkedSemanticSearch
 import json
 
 
@@ -57,4 +57,8 @@ def embed_chunks():
             data = json.load(f)
     documents = data["movies"]
     chunk_embeddings=chunked_semantic_search.load_or_create_chunk_embeddings(documents)
-    print(f"Generated {len(chunk_embeddings)} chunked embeddings")
+    return chunked_semantic_search
+
+def search_chunked(query,limit):
+    chunked_semantic_search=embed_chunks()
+    return chunked_semantic_search.search_chunks(query,limit)
