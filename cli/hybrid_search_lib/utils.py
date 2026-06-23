@@ -110,11 +110,15 @@ def enhance_text(query, enhance=None):
 
                     User query: "{query}"
                     """
-        res = client.models.generate_content(model="gemma-4-31b-it", contents=contents)
-
-        if res.text:
-            print(f"Enhanced query ({enhance}): '{query}' -> '{res.text}'\n")
-            return res.text
+        try:
+            res = client.models.generate_content(
+                model="gemma-4-31b-it", contents=contents
+            )
+            if res.text:
+                print(f"Enhanced query ({enhance}): '{query}' -> '{res.text}'\n")
+                return res.text
+        except Exception as e:
+            print(f"Query enhancement failed ({e}), using original query.\n")
     return query
 
 
