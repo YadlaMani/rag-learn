@@ -11,78 +11,81 @@ from cli.semantic_search_lib.chunking import *
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Semantic Search CLI")
+    parser = argparse.ArgumentParser(
+        description="Search movies using semantic embeddings"
+    )
     subparser = parser.add_subparsers(dest="command", help="Available commands")
     subparser.add_parser(
-        "verify", help="Prints the semantic model and its sequence length"
+        "verify", help="Show the loaded model name and its max sequence length"
     )
     subparser.add_parser(
         "verify_embeddings",
-        help="Transform our movies into a searchable vector database and verify",
+        help="Build movie embeddings and verify the index",
     )
     embed_text_parser = subparser.add_parser(
-        "embed_text", help="Generate the text embeddings"
+        "embed_text", help="Encode a text string and print its embedding"
     )
-    embed_text_parser.add_argument(
-        "text", type=str, help="Text to generate the Embeddings"
-    )
+    embed_text_parser.add_argument("text", type=str, help="Text to encode")
 
     embed_query_parser = subparser.add_parser(
-        "embed_query", help="Generate the text embeddings"
+        "embed_query", help="Encode a search query and print its embedding"
     )
-    embed_query_parser.add_argument(
-        "query", type=str, help="Query to generate the Embeddings"
-    )
+    embed_query_parser.add_argument("query", type=str, help="Query to encode")
 
     search_parser = subparser.add_parser(
-        "search", help="Search movies using semantic search"
+        "search", help="Search movies using semantic similarity"
     )
     search_parser.add_argument("query", type=str, help="Search query")
-    search_parser.add_argument("--limit", type=int, default=5, help="Top N documents")
+    search_parser.add_argument(
+        "--limit", type=int, default=5, help="Number of results to return (default: 5)"
+    )
 
-    chunk_parser = subparser.add_parser("chunk", help="Split the text into chunks")
-    chunk_parser.add_argument("text", type=str, help="Text to divive into chunks")
+    chunk_parser = subparser.add_parser(
+        "chunk", help="Split text into fixed-size word chunks"
+    )
+    chunk_parser.add_argument("text", type=str, help="Text to split into chunks")
     chunk_parser.add_argument(
-        "--chunk-size", type=int, default=200, help="Number of words in each chunk"
+        "--chunk-size",
+        type=int,
+        default=200,
+        help="Number of words per chunk (default: 200)",
     )
     chunk_parser.add_argument(
         "--overlap",
         type=int,
         default=2,
-        help="Number of words to overlap in each chunk",
+        help="Number of words to overlap between chunks (default: 2)",
     )
 
     semantic_chunk_parser = subparser.add_parser(
-        "semantic_chunk", help="Split the text into semantic chunks"
+        "semantic_chunk", help="Split text into sentence-based semantic chunks"
     )
     semantic_chunk_parser.add_argument(
-        "text", type=str, help="Text to divive into chunks"
+        "text", type=str, help="Text to split into chunks"
     )
     semantic_chunk_parser.add_argument(
         "--max-chunk-size",
         type=int,
         default=4,
-        help="Number of semantics in each chunk",
+        help="Max sentences per chunk (default: 4)",
     )
     semantic_chunk_parser.add_argument(
         "--overlap",
         type=int,
         default=0,
-        help="Number of words to overlap in each semantic chunk",
+        help="Number of sentences to overlap between chunks (default: 0)",
     )
 
     subparser.add_parser(
-        "embed_chunks", help="Load movies documents and build the chunk embeddings"
+        "embed_chunks", help="Build and cache chunk embeddings for all movies"
     )
 
     search_chunked__parser = subparser.add_parser(
-        "search_chunked", help="Search text using the chunked semantic search"
+        "search_chunked", help="Search movies using chunked semantic search"
     )
+    search_chunked__parser.add_argument("query", type=str, help="Search query")
     search_chunked__parser.add_argument(
-        "query", type=str, help="Query to find using the chunked semantic search"
-    )
-    search_chunked__parser.add_argument(
-        "--limit", type=int, default=5, help="Number of matching results to show"
+        "--limit", type=int, default=5, help="Number of results to return (default: 5)"
     )
 
     args = parser.parse_args()
@@ -118,7 +121,7 @@ def main() -> None:
         case "search_chunked":
             search_result = search_chunked(args.query, args.limit)
             for i, res in enumerate(search_result):
-                print(f"\n{i + 1}. {res['title']} (score: {res['score']:.4f})")
+                print(f"\n{i + 1}. {res['title']} (score: {res['score']:.3f})")
                 print(f"\t{res['document']}...")
 
         case _:

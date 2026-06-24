@@ -9,12 +9,14 @@ from cli.hybrid_search_lib.utils import *
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Search Evaluation CLI")
+    parser = argparse.ArgumentParser(
+        description="Evaluate search quality using precision@k, recall@k, and F1"
+    )
     parser.add_argument(
         "--limit",
         type=int,
         default=5,
-        help="Number of results to evaluate (k for precision@k, recall@k)",
+        help="Number of results per query (k) for computing precision@k, recall@k, and F1 (default: 5)",
     )
     args = parser.parse_args()
     limit = args.limit

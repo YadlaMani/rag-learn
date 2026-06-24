@@ -8,18 +8,20 @@ from cli.hybrid_search_lib.utils import *
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Hybrid Search CLI")
+    parser = argparse.ArgumentParser(
+        description="Search movies by combining keyword and semantic search"
+    )
     subparser = parser.add_subparsers(dest="command", help="Available commands")
     normalize_parser = subparser.add_parser(
-        "normalize", help="Normalizes the given values in the range 0-1"
+        "normalize", help="Normalize a list of scores to the 0–1 range"
     )
     normalize_parser.add_argument(
-        "scores", type=float, nargs="*", help="Scores to normalize"
+        "scores", type=float, nargs="*", help="Space-separated scores to normalize"
     )
 
     weighted_search_parser = subparser.add_parser(
         "weighted-search",
-        help="Search movies using both keyword and semantic search with added weights",
+        help="Search movies by blending BM25 and semantic scores with a weighted alpha",
     )
     weighted_search_parser.add_argument("query", type=str, help="Search query")
     weighted_search_parser.add_argument(
@@ -27,15 +29,19 @@ def main() -> None:
         type=float,
         nargs="?",
         default=0.5,
-        help="alpha is just a constant that we can use to dynamically control the weighting between the two scores",
+        help="Balance between keyword (0.0) and semantic (1.0) scoring (default: 0.5)",
     )
     weighted_search_parser.add_argument(
-        "--limit", type=int, nargs="?", default=5, help="Top N documents"
+        "--limit",
+        type=int,
+        nargs="?",
+        default=5,
+        help="Number of results to return (default: 5)",
     )
 
     rrf_search_parser = subparser.add_parser(
         "rrf-search",
-        help="Search movies using both keyword and semantic search with rrf",
+        help="Search movies using Reciprocal Rank Fusion of keyword and semantic results",
     )
     rrf_search_parser.add_argument("query", type=str, help="Search query")
     rrf_search_parser.add_argument(
@@ -43,29 +49,33 @@ def main() -> None:
         type=int,
         nargs="?",
         default=60,
-        help="The k parameter (a constant) controls how much more weight we give to higher-ranked results vs. lower-ranked ones",
+        help="RRF smoothing constant; higher values reduce rank differences (default: 60)",
     )
     rrf_search_parser.add_argument(
-        "--limit", type=int, nargs="?", default=5, help="Top N documents"
+        "--limit",
+        type=int,
+        nargs="?",
+        default=5,
+        help="Number of results to return (default: 5)",
     )
     rrf_search_parser.add_argument(
         "--enhance",
         type=str,
         choices=["spell", "rewrite", "expand"],
-        help="Query enhancement method",
+        help="Enhance query before search: 'spell' fixes typos, 'rewrite' rephrases, 'expand' adds synonyms",
     )
 
     rrf_search_parser.add_argument(
         "--rerank-method",
         type=str,
         choices=["individual", "batch", "cross_encoder"],
-        help="rerank the result using the llm",
+        help="Re-rank results after retrieval: 'individual' (LLM per doc), 'batch' (LLM batch), 'cross_encoder'",
     )
 
     rrf_search_parser.add_argument(
         "--evaluate",
         action="store_true",
-        help="Use the llm to rank the results",
+        help="Score each result for relevance using an LLM (0–3 scale)",
     )
 
     args = parser.parse_args()

@@ -10,53 +10,55 @@ from cli.hybrid_search_lib.utils import *
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Retrieval Augmented Generation CLI")
+    parser = argparse.ArgumentParser(
+        description="Answer movie questions by retrieving relevant context (RAG)"
+    )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     rag_parser = subparsers.add_parser(
-        "rag", help="Perform RAG (search + generate answer)"
+        "rag", help="Find relevant movies and generate a natural-language answer"
     )
-    rag_parser.add_argument("query", type=str, help="Search query for RAG")
+    rag_parser.add_argument("query", type=str, help="Search query")
     rag_parser.add_argument(
         "--limit",
         type=int,
         default=5,
-        help="Number of documents to refer for the generated answer",
+        help="Number of retrieved movies to include in the prompt (default: 5)",
     )
 
     summarize_parser = subparsers.add_parser(
         "summarize",
-        help="Perform RAG (search + generate summary of the documents recieved)",
+        help="Find relevant movies and generate a combined summary",
     )
-    summarize_parser.add_argument("query", type=str, help="Search query for RAG")
+    summarize_parser.add_argument("query", type=str, help="Search query")
     summarize_parser.add_argument(
         "--limit",
         type=int,
         default=5,
-        help="Number of documents to refer for the summary",
+        help="Number of retrieved movies to include in the prompt (default: 5)",
     )
 
     citations_parser = subparsers.add_parser(
         "citations",
-        help="Perform RAG (search + generate summary of the documents recieved with citations)",
+        help="Find relevant movies and generate a summary with source citations",
     )
-    citations_parser.add_argument("query", type=str, help="Search query for RAG")
+    citations_parser.add_argument("query", type=str, help="Search query")
     citations_parser.add_argument(
         "--limit",
         type=int,
         default=5,
-        help="Number of documents to refer for the citations",
+        help="Number of retrieved movies to include in the prompt (default: 5)",
     )
 
     question_parser = subparsers.add_parser(
-        "question", help="Perform RAG (search + generate answer for the question)"
+        "question", help="Answer a question conversationally using retrieved movie data"
     )
-    question_parser.add_argument("query", type=str, help="Search query for RAG")
+    question_parser.add_argument("query", type=str, help="Search query")
     question_parser.add_argument(
         "--limit",
         type=int,
         default=5,
-        help="Number of documents to refer for the answer",
+        help="Number of retrieved movies to include in the prompt (default: 5)",
     )
 
     args = parser.parse_args()

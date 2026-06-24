@@ -13,51 +13,55 @@ import cli.keyword_search_lib.constants as constants
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Keyword search CLI")
+    parser = argparse.ArgumentParser(
+        description="Search movies using keyword-based retrieval (TF-IDF and BM25)"
+    )
     subparser = parser.add_subparsers(dest="command", help="Available commands")
-    search_parser = subparser.add_parser("search", help="Search movies using keywords")
+    search_parser = subparser.add_parser(
+        "search", help="Search movies by keyword using the inverted index"
+    )
     search_parser.add_argument("query", type=str, help="Search query")
-    subparser.add_parser("build", help="Build and cache the inverted index")
+    subparser.add_parser(
+        "build", help="Build and cache the inverted index from movies data"
+    )
     tf_parser = subparser.add_parser(
-        "tf", help="Get the term frequency for a token in a document"
+        "tf", help="Get the raw term frequency of a token in a document"
     )
-    tf_parser.add_argument("doc_id", type=int, help="Document Id")
-    tf_parser.add_argument("token", type=str, help="Search token")
+    tf_parser.add_argument("doc_id", type=int, help="Document ID (1-indexed)")
+    tf_parser.add_argument("token", type=str, help="Token to look up")
     idf_parser = subparser.add_parser(
-        "idf", help="Inverse Document frequency of a term"
+        "idf", help="Get the inverse document frequency (IDF) of a term"
     )
-    idf_parser.add_argument("term", type=str, help="Search term")
+    idf_parser.add_argument("term", type=str, help="Term to compute IDF for")
     tfidf_parser = subparser.add_parser(
-        "tfidf", help="Calculates TF-IDF for a term in document"
+        "tfidf", help="Compute the TF-IDF score of a term in a document"
     )
-    tfidf_parser.add_argument("doc_id", type=int, help="Document Id")
-    tfidf_parser.add_argument("term", type=str, help="Search term")
+    tfidf_parser.add_argument("doc_id", type=int, help="Document ID (1-indexed)")
+    tfidf_parser.add_argument("term", type=str, help="Term to compute TF-IDF for")
 
     bm25_idf_parser = subparser.add_parser(
-        "bm25idf", help="Get BM25 IDF score for a given term"
+        "bm25idf", help="Get the BM25-adjusted IDF score for a term"
     )
-    bm25_idf_parser.add_argument(
-        "term", type=str, help="Term to get BM25 IDF score for"
-    )
+    bm25_idf_parser.add_argument("term", type=str, help="Term to compute BM25 IDF for")
 
     bm25_tf_parser = subparser.add_parser(
-        "bm25tf", help="Get BM25 TF score for a given document ID and term"
+        "bm25tf", help="Get the BM25-adjusted TF score for a term in a document"
     )
-    bm25_tf_parser.add_argument("doc_id", type=int, help="Document ID")
-    bm25_tf_parser.add_argument("term", type=str, help="Term to get BM25 TF score for")
+    bm25_tf_parser.add_argument("doc_id", type=int, help="Document ID (1-indexed)")
+    bm25_tf_parser.add_argument("term", type=str, help="Term to compute BM25 TF for")
     bm25_tf_parser.add_argument(
         "k1",
         type=float,
         nargs="?",
         default=constants.BM25_K1,
-        help="Tunable BM25 K1 parameter",
+        help="BM25 k1 parameter, controls term frequency saturation (default: 1.5)",
     )
     bm25_tf_parser.add_argument(
         "b",
         type=float,
         nargs="?",
         default=constants.BM25_B,
-        help="Tunable BM25 b parameter",
+        help="BM25 b parameter, controls document length normalization (default: 0.75)",
     )
 
     bm25search_parser = subparser.add_parser(
@@ -65,7 +69,11 @@ def main() -> None:
     )
     bm25search_parser.add_argument("query", type=str, help="Search query")
     bm25search_parser.add_argument(
-        "limit", type=int, nargs="?", default=5, help="Top N documents"
+        "limit",
+        type=int,
+        nargs="?",
+        default=5,
+        help="Number of results to return (default: 5)",
     )
 
     args = parser.parse_args()
@@ -114,7 +122,7 @@ def main() -> None:
                 / len(inverted_index.get_documents(processed_term[0]))
             )
 
-            print(f"Inverse document frequency of '{args.term}': {idf:.2f}")
+            print(f"Inverse document frequency of '{args.term}': {idf:.3f}")
 
         case "tfidf":
             inverted_index.load()
@@ -130,14 +138,14 @@ def main() -> None:
             )
             tf_idf = tf * idf
             print(
-                f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tf_idf:.2f}"
+                f"TF-IDF score of '{args.term}' in document '{args.doc_id}': {tf_idf:.3f}"
             )
         case "bm25idf":
             inverted_index.load()
             search_term = args.term
             processed_term = processor.process(search_term)
             bm25idf = inverted_index.get_bm25_idf(processed_term[0])
-            print(f"BM25 IDF score of '{args.term}': {bm25idf:.2f}")
+            print(f"BM25 IDF score of '{args.term}': {bm25idf:.3f}")
         case "bm25tf":
             inverted_index.load()
             doc_id = args.doc_id - 1
@@ -149,7 +157,7 @@ def main() -> None:
             b = args.b
             bm25tf = inverted_index.get_bm25_tf(doc_id, processed_term[0], k1, b)
             print(
-                f"BM25 TF score of '{args.term}' in document '{args.doc_id}': {bm25tf:.2f}"
+                f"BM25 TF score of '{args.term}' in document '{args.doc_id}': {bm25tf:.3f}"
             )
 
         case "bm25search":
@@ -159,7 +167,7 @@ def main() -> None:
             docs = inverted_index.bm25_search(query, limit)
             for i, doc_id in enumerate(docs):
                 title = inverted_index.docmap[doc_id]["title"]
-                print(f"{i + 1}. ({doc_id + 1}) {title} - Score: {docs[doc_id]:.2f}")
+                print(f"{i + 1}. ({doc_id + 1}) {title} - Score: {docs[doc_id]:.3f}")
 
         case _:
             parser.print_help()

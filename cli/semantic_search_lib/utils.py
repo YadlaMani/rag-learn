@@ -47,7 +47,7 @@ def search_movies(query, limit):
     semantic_search.load_or_create_embeddings(documents)
     results = semantic_search.search(query, limit)
     for i, res in enumerate(results):
-        print(f"{i + 1}. {res['title']} (score: {res['score']:.4f})")
+        print(f"{i + 1}. {res['title']} (score: {res['score']:.3f})")
         print(f"   {res['description']}")
 
 

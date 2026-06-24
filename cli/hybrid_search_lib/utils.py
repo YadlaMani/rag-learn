@@ -14,10 +14,10 @@ def normalize(scores):
     mini = min(scores)
     if maxi == mini:
         for _ in scores:
-            print(f"* 1.0000")
+            print(f"* 1.000")
     else:
         for score in scores:
-            print(f"* {(score - mini) / (maxi - mini):.4f}")
+            print(f"* {(score - mini) / (maxi - mini):.3f}")
 
 
 def weighted_search(query, alpha, limit):
@@ -28,7 +28,7 @@ def weighted_search(query, alpha, limit):
     results = hybrid_search.weighted_search(query, alpha, limit)
     for i, (doc_id, res) in enumerate(results):
         print(
-            f"{i + 1}. {res['title']}\nHybrid Score: {res['hybrid']:.4f}\nBM25: {res['bm25']:.4f}, Semantic: {res['semantic']:.4f}\n{res['description']}\n"
+            f"{i + 1}. {res['title']}\nHybrid Score: {res['hybrid']:.3f}\nBM25: {res['bm25']:.3f}, Semantic: {res['semantic']:.3f}\n{res['description']}\n"
         )
 
 
@@ -46,13 +46,13 @@ def rrf_search(query, k=60, limit=5, rerank_method=None, verbose=True):
             print("RFF Search Results before re-ranking")
             for i, (_, res) in enumerate(results):
                 print(
-                    f"{i + 1}. {res['title']}\nRRF Score: {res['rrf']:.4f}\nBM25 Rank: {res['bm25']:.4f}, Semantic Rank: {res['semantic']:.4f}\n{res['description']}\n"
+                    f"{i + 1}. {res['title']}\nRRF Score: {res['rrf']:.3f}\nBM25 Rank: {res['bm25']:.3f}, Semantic Rank: {res['semantic']:.3f}\n{res['description']}\n"
                 )
             rerank_results(original_limit, results, rerank_method, query, k, verbose)
         else:
             for i, (_, res) in enumerate(results):
                 print(
-                    f"{i + 1}. {res['title']}\nRRF Score: {res['rrf']:.4f}\nBM25 Rank: {res['bm25']:.4f}, Semantic Rank: {res['semantic']:.4f}\n{res['description']}\n"
+                    f"{i + 1}. {res['title']}\nRRF Score: {res['rrf']:.3f}\nBM25 Rank: {res['bm25']:.3f}, Semantic Rank: {res['semantic']:.3f}\n{res['description']}\n"
                 )
     return results
 
@@ -217,18 +217,18 @@ def rerank_results(limit, results, method, query, k, verbose=True):
                 )
             elif method == "individual":
                 rerank_line = (
-                    f"Re-rank Score: {res['rerank']:.4f}/10\n"
+                    f"Re-rank Score: {res['rerank']:.3f}/10\n"
                     if "rerank" in res
                     else ""
                 )
             else:
                 rerank_line = (
-                    f"Cross Encoder Score: {res['cross-encoder']:.4f}\n"
+                    f"Cross Encoder Score: {res['cross-encoder']:.3f}\n"
                     if "cross-encoder" in res
                     else ""
                 )
             print(
-                f"{i + 1}. {res['title']}\n{rerank_line}RRF Score: {res['rrf']:.4f}\nBM25 Rank: {res['bm25']:.4f}, Semantic Rank: {res['semantic']:.4f}\n{res['description']}\n"
+                f"{i + 1}. {res['title']}\n{rerank_line}RRF Score: {res['rrf']:.3f}\nBM25 Rank: {res['bm25']:.3f}, Semantic Rank: {res['semantic']:.3f}\n{res['description']}\n"
             )
     return final_results
 
